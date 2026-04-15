@@ -1,3 +1,28 @@
+# Spring Boot
+target/
+*.class
+*.jar
+*.war
+application-local.properties
+
+# Secrets — NUNCA subas esto
+application-secrets.properties
+.env
+*.env
+
+# Antigravity
+.gemini/
+
+# React / Vite
+node_modules/
+dist/
+.env.local
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+
 # Compiled class file
 *.class
 
