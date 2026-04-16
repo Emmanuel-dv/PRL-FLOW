@@ -1,0 +1,23 @@
+CREATE TABLE companies (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    cif VARCHAR(50) NOT NULL UNIQUE,
+    address VARCHAR(500),
+    active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE users (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    company_id BIGINT NOT NULL,
+    manager_id BIGINT,
+    job_position_id BIGINT,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    role ENUM('ADMIN','MANAGER','WORKER') NOT NULL,
+    active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_user_company FOREIGN KEY (company_id) REFERENCES companies(id),
+    CONSTRAINT fk_user_manager FOREIGN KEY (manager_id) REFERENCES users(id)
+);

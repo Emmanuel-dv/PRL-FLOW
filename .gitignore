@@ -5,7 +5,7 @@ target/
 *.war
 application-local.properties
 
-# Secrets — NUNCA subas esto
+# Secrets —
 application-secrets.properties
 .env
 *.env
