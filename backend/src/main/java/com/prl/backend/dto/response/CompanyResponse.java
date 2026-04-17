@@ -11,14 +11,12 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserResponse {
+public class CompanyResponse {
 
     private Long id;
     private String name;
-    private String email;
-    private String role;
+    private String cif;
+    private String address;
     private boolean active;
     private LocalDateTime createdAt;
-    private Long companyId;
-    private String companyName;
 }
