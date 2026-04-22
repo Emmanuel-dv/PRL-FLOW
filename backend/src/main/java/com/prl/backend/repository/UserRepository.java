@@ -19,9 +19,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     List<User> findByCompanyIdAndActiveTrue(Long companyId);
 
-    List<User> findByCompanyIdAndRole(Long companyId, Role role);
+    List<User> findByCompany_IdAndRole(Long companyId, Role role);
 
-    List<User> findByManagerId(Long managerId);
+    List<User> findByManager_Id(Long managerId);
 
     boolean existsByEmailAndIdNot(String email, Long id);
 }

@@ -63,6 +63,7 @@ public class CompanyServiceImpl implements CompanyService {
         Company company = companyRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Empresa no encontrada con id: " + id));
         company.setActive(false);
+        company.setCif(company.getCif() + "_deleted_" + System.currentTimeMillis());
         companyRepository.save(company);
     }
 }

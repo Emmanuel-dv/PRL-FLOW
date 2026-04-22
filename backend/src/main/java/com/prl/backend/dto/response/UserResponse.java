@@ -21,4 +21,8 @@ public class UserResponse {
     private LocalDateTime createdAt;
     private Long companyId;
     private String companyName;
+    private Long managerId;
+    private String managerName;
+    private Long jobPositionId;
+    private String jobPositionName;
 }

@@ -50,6 +50,11 @@ public class WorkerDocumentServiceImpl implements WorkerDocumentService {
             throw new IllegalArgumentException("El tipo de documento no pertenece a su empresa.");
         }
 
+        if (documentType.isRequiresExpiry() && request.getExpiryDate() == null) {
+            throw new IllegalArgumentException(
+                    "Este tipo de documento requiere fecha de caducidad");
+        }
+
         FileMetadata fileMetadata = minioService.uploadFile(file, currentUser);
 
         WorkerDocument workerDocument = WorkerDocument.builder()
@@ -169,9 +174,9 @@ public class WorkerDocumentServiceImpl implements WorkerDocumentService {
             throw new IllegalArgumentException("El trabajador no pertenece a su empresa.");
         }
 
-        List<PositionDocumentReq> requirements = worker.getJobPositionId() != null
+        List<PositionDocumentReq> requirements = worker.getJobPosition() != null
                 ? positionDocumentReqRepository
-                .findByJobPositionIdAndActiveTrue(worker.getJobPositionId())
+                .findByJobPositionIdAndActiveTrue(worker.getJobPosition().getId())
                 : Collections.emptyList();
 
         long totalRequired = requirements.stream()
@@ -230,7 +235,14 @@ public class WorkerDocumentServiceImpl implements WorkerDocumentService {
 
     private List<WorkerDocumentResponse> enrichResponseList(List<WorkerDocument> docs) {
         return docs.stream()
-                .map(this::enrichResponse)
+                .map(doc -> {
+                    WorkerDocumentResponse response = workerDocumentMapper.toResponse(doc);
+                    response.setDownloadUrl(null);
+                    response.setExpiringSoon(
+                            doc.getExpiryDate() != null
+                                    && doc.getExpiryDate().isBefore(LocalDate.now().plusDays(30)));
+                    return response;
+                })
                 .collect(Collectors.toList());
     }
 }
