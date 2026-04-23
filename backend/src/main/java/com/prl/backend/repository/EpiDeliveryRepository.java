@@ -19,4 +19,6 @@ public interface EpiDeliveryRepository extends JpaRepository<EpiDelivery, Long> 
     List<EpiDelivery> findByWorkerIdAndStatus(Long workerId, DeliveryStatus status);
 
     List<EpiDelivery> findByCompanyIdAndStatus(Long companyId, DeliveryStatus status);
+
+    long countByCompanyIdAndStatus(Long companyId, DeliveryStatus status);
 }

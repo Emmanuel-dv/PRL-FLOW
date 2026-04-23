@@ -32,4 +32,8 @@ public interface WorkerDocumentRepository extends JpaRepository<WorkerDocument, 
             "AND wd.expiryDate IS NOT NULL " +
             "AND wd.expiryDate < :today")
     List<WorkerDocument> findExpired(@Param("today") LocalDate today);
+
+    long countByWorkerCompanyIdAndStatus(Long companyId, DocumentStatus status);
+
+    long countByWorkerCompanyId(Long companyId);
 }

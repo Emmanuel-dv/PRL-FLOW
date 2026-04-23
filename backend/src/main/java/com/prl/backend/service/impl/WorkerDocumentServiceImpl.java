@@ -5,6 +5,7 @@ import com.prl.backend.dto.request.UploadWorkerDocumentRequest;
 import com.prl.backend.dto.response.WorkerDocumentResponse;
 import com.prl.backend.entity.*;
 import com.prl.backend.entity.enums.DocumentStatus;
+import com.prl.backend.entity.enums.NotificationType;
 import com.prl.backend.entity.enums.Role;
 import com.prl.backend.mapper.WorkerDocumentMapper;
 import com.prl.backend.repository.DocumentTypeRepository;
@@ -13,6 +14,7 @@ import com.prl.backend.repository.UserRepository;
 import com.prl.backend.repository.WorkerDocumentRepository;
 import com.prl.backend.security.SecurityUtils;
 import com.prl.backend.service.MinioService;
+import com.prl.backend.service.NotificationService;
 import com.prl.backend.service.WorkerDocumentService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +39,7 @@ public class WorkerDocumentServiceImpl implements WorkerDocumentService {
     private final MinioService minioService;
     private final WorkerDocumentMapper workerDocumentMapper;
     private final SecurityUtils securityUtils;
+    private final NotificationService notificationService;
 
     @Override
     public WorkerDocumentResponse upload(UploadWorkerDocumentRequest request, MultipartFile file) {
@@ -157,6 +160,23 @@ public class WorkerDocumentServiceImpl implements WorkerDocumentService {
                         : null);
 
         doc = workerDocumentRepository.save(doc);
+
+        if (doc.getStatus() == DocumentStatus.APPROVED) {
+            notificationService.create(
+                    doc.getWorker(),
+                    NotificationType.DOCUMENT_APPROVED,
+                    "Documento aprobado",
+                    "Tu documento '" + doc.getDocumentType().getName() + "' ha sido aprobado",
+                    "WORKER_DOCUMENT", doc.getId());
+        } else if (doc.getStatus() == DocumentStatus.REJECTED) {
+            notificationService.create(
+                    doc.getWorker(),
+                    NotificationType.DOCUMENT_REJECTED,
+                    "Documento rechazado",
+                    "Tu documento '" + doc.getDocumentType().getName() +
+                            "' ha sido rechazado. Motivo: " + request.getRejectionReason(),
+                    "WORKER_DOCUMENT", doc.getId());
+        }
 
         return enrichResponse(doc);
     }

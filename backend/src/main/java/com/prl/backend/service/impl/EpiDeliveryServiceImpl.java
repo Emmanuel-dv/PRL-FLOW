@@ -7,6 +7,7 @@ import com.prl.backend.dto.response.EpiDeliveryItemResponse;
 import com.prl.backend.dto.response.EpiDeliveryResponse;
 import com.prl.backend.entity.*;
 import com.prl.backend.entity.enums.DeliveryStatus;
+import com.prl.backend.entity.enums.NotificationType;
 import com.prl.backend.entity.enums.Role;
 import com.prl.backend.mapper.EpiDeliveryConfirmMapper;
 import com.prl.backend.mapper.EpiDeliveryItemMapper;
@@ -15,6 +16,7 @@ import com.prl.backend.repository.*;
 import com.prl.backend.security.HashUtils;
 import com.prl.backend.security.SecurityUtils;
 import com.prl.backend.service.EpiDeliveryService;
+import com.prl.backend.service.NotificationService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +43,7 @@ public class EpiDeliveryServiceImpl implements EpiDeliveryService {
     private final EpiDeliveryConfirmMapper epiDeliveryConfirmMapper;
     private final SecurityUtils securityUtils;
     private final HashUtils hashUtils;
+    private final NotificationService notificationService;
 
     @Override
     public EpiDeliveryResponse create(CreateEpiDeliveryRequest request) {
@@ -88,6 +91,13 @@ public class EpiDeliveryServiceImpl implements EpiDeliveryService {
         }
 
         epiDeliveryItemRepository.saveAll(items);
+
+        notificationService.create(
+                worker,
+                NotificationType.EPI_DELIVERY_PENDING,
+                "Nuevos EPIs pendientes de recogida",
+                "El encargado " + currentUser.getName() + " ha preparado una entrega de EPIs para ti",
+                "EPI_DELIVERY", delivery.getId());
 
         return enrichResponse(delivery, items, null);
     }
@@ -208,6 +218,13 @@ public class EpiDeliveryServiceImpl implements EpiDeliveryService {
 
         delivery.setStatus(DeliveryStatus.CONFIRMED);
         delivery = epiDeliveryRepository.save(delivery);
+
+        notificationService.create(
+                delivery.getManager(),
+                NotificationType.EPI_DELIVERY_CONFIRMED,
+                "EPIs confirmados por el trabajador",
+                delivery.getWorker().getName() + " ha confirmado la recepción de los EPIs",
+                "EPI_DELIVERY", delivery.getId());
 
         return enrichResponse(delivery, null, confirm);
     }
