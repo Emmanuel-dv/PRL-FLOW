@@ -54,10 +54,10 @@ public class IncidentServiceImpl implements IncidentService {
                 .status(IncidentStatus.OPEN)
                 .build();
 
-        incident = incidentRepository.save(incident);
+        final Incident savedIncident = incidentRepository.save(incident);
 
         IncidentStatusLog log = IncidentStatusLog.builder()
-                .incident(incident)
+                .incident(savedIncident)
                 .changedBy(currentUser)
                 .oldStatus(null)
                 .newStatus(IncidentStatus.OPEN)
@@ -72,10 +72,10 @@ public class IncidentServiceImpl implements IncidentService {
                 admin,
                 NotificationType.INCIDENT_CREATED,
                 "Nueva incidencia reportada",
-                incident.getSeverity().name() + ": " + incident.getTitle(),
-                "INCIDENT", incident.getId()));
+                savedIncident.getSeverity().name() + ": " + savedIncident.getTitle(),
+                "INCIDENT", savedIncident.getId()));
 
-        return enrichResponse(incident);
+        return enrichResponse(savedIncident);
     }
 
     @Override
@@ -159,19 +159,19 @@ public class IncidentServiceImpl implements IncidentService {
             incident.setResolvedAt(LocalDateTime.now());
         }
 
-        incident = incidentRepository.save(incident);
+        final Incident updatedIncident = incidentRepository.save(incident);
 
-        if (request.getAssignedToId() != null && incident.getAssignedTo() != null) {
+        if (request.getAssignedToId() != null && updatedIncident.getAssignedTo() != null) {
             notificationService.create(
-                    incident.getAssignedTo(),
+                    updatedIncident.getAssignedTo(),
                     NotificationType.INCIDENT_ASSIGNED,
                     "Incidencia asignada a ti",
-                    "Se te ha asignado la incidencia: " + incident.getTitle(),
-                    "INCIDENT", incident.getId());
+                    "Se te ha asignado la incidencia: " + updatedIncident.getTitle(),
+                    "INCIDENT", updatedIncident.getId());
         }
 
         IncidentStatusLog log = IncidentStatusLog.builder()
-                .incident(incident)
+                .incident(updatedIncident)
                 .changedBy(currentUser)
                 .oldStatus(oldStatus)
                 .newStatus(request.getNewStatus())
@@ -180,7 +180,7 @@ public class IncidentServiceImpl implements IncidentService {
 
         statusLogRepository.save(log);
 
-        return enrichResponse(incident);
+        return enrichResponse(updatedIncident);
     }
 
     private IncidentResponse enrichResponse(Incident incident) {
