@@ -94,7 +94,7 @@ function RequirementsDialog({ open, onOpenChange, position, docTypes, epiCatalog
     if (!newEpiId) return
     setAddingEpi(true)
     try {
-      await jobPositionApi.assignEpi(position.id, { epiCatalogId: Number(newEpiId), quantityRequired: newEpiQty })
+      await jobPositionApi.assignEpi(position.id, { epiCatalogId: Number(newEpiId), quantityRequired: parseInt(newEpiQty, 10) })
       const e = await jobPositionApi.getEpis(position.id)
       setEpis(e); setNewEpiId(''); setNewEpiQty(1); toast.success('EPI añadido')
     } catch (err) { toast.error(err.response?.data?.message ?? 'Error al añadir') }

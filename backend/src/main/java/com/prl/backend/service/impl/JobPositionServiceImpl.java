@@ -167,7 +167,7 @@ public class JobPositionServiceImpl implements com.prl.backend.service.JobPositi
 
     private JobPosition findOwnedPosition(Long id) {
         Long companyId = securityUtils.getCurrentCompanyId();
-        JobPosition jobPosition = jobPositionRepository.findById(id)
+        JobPosition jobPosition = jobPositionRepository.findByIdWithCompany(id)
                 .orElseThrow(() -> new EntityNotFoundException("Puesto no encontrado: " + id));
         if (!jobPosition.getCompany().getId().equals(companyId)) {
             throw new IllegalArgumentException("El puesto no pertenece a su empresa.");
