@@ -3,6 +3,9 @@ import axiosClient from './axiosClient'
 export const getMy = () =>
   axiosClient.get('/api/worker-documents/my').then((r) => r.data)
 
+export const getById = (id) =>
+  axiosClient.get(`/api/worker-documents/${id}`).then((r) => r.data)
+
 export const getByWorker = (workerId) =>
   axiosClient.get(`/api/worker-documents/worker/${workerId}`).then((r) => r.data)
 
