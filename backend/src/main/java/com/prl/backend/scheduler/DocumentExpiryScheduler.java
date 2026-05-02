@@ -25,6 +25,8 @@ public class DocumentExpiryScheduler {
     private final NotificationService notificationService;
     private final UserRepository userRepository;
 
+
+    //Ejecutar cron 3 am
     @Scheduled(cron = "0 0 8 * * *")
     public void checkDocumentExpiry() {
         LocalDate today = LocalDate.now();

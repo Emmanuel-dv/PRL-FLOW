@@ -1,11 +1,17 @@
 import axios from 'axios'
 
+/**
+ * Nota: Voy a usar axios porque lo he visto y usado mas que fetch, debo revisar un par de cosas de documentacion
+ * y terminar de ver el video de la implementacion con spring boot
+ */
+
 const axiosClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080',
   headers: { 'Content-Type': 'application/json' },
 })
 
-// ── REQUEST interceptor ────────────────────────────────────────────────────────
+
+//Para poder coger el token de acceso desde localstorage, mirar si hay alguna mas eficiente. Si no lo es, revisar si debo refactorizar
 axiosClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('accessToken')
@@ -17,7 +23,6 @@ axiosClient.interceptors.request.use(
   (error) => Promise.reject(error),
 )
 
-// ── RESPONSE interceptor (auto-refresh on 401) ────────────────────────────────
 let isRefreshing = false
 let failedQueue = []
 
