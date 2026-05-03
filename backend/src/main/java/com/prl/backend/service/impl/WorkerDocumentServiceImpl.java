@@ -18,6 +18,7 @@ import com.prl.backend.service.NotificationService;
 import com.prl.backend.service.WorkerDocumentService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -58,16 +59,20 @@ public class WorkerDocumentServiceImpl implements WorkerDocumentService {
                     "Este tipo de documento requiere fecha de caducidad");
         }
 
-        FileMetadata fileMetadata = minioService.uploadFile(file, currentUser);
-
+        // 1. Persist the record in MySQL first (no MinIO contact yet).
+        //    If the DB rejects it (constraint, validation, etc.) no orphan file is created.
         WorkerDocument workerDocument = WorkerDocument.builder()
                 .worker(currentUser)
                 .documentType(documentType)
-                .fileMetadata(fileMetadata)
                 .issueDate(request.getIssueDate())
                 .expiryDate(request.getExpiryDate())
                 .build();
 
+        workerDocument = workerDocumentRepository.saveAndFlush(workerDocument);
+
+        // 2. Upload to MinIO only after MySQL has accepted the record.
+        FileMetadata fileMetadata = minioService.uploadFile(file, currentUser);
+        workerDocument.setFileMetadata(fileMetadata);
         workerDocument = workerDocumentRepository.save(workerDocument);
 
         return enrichResponse(workerDocument);
@@ -81,8 +86,16 @@ public class WorkerDocumentServiceImpl implements WorkerDocumentService {
                         "Documento no encontrado: " + id));
 
         User currentUser = securityUtils.getCurrentUser();
+
+        // Cross-company check (applies to all roles)
         if (!doc.getWorker().getCompany().getId().equals(currentUser.getCompany().getId())) {
             throw new IllegalArgumentException("El documento no pertenece a su empresa.");
+        }
+
+        // Intra-company IDOR guard: a WORKER may only access their own documents
+        if (currentUser.getRole() == Role.WORKER
+                && !doc.getWorker().getId().equals(currentUser.getId())) {
+            throw new AccessDeniedException("No tienes acceso a este documento");
         }
 
         return enrichResponse(doc);
