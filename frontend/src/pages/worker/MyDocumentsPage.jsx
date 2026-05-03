@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import { Plus, Upload, Loader2, ExternalLink, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { Plus, Upload, Loader2, AlertCircle } from 'lucide-react'
 import * as workerDocumentApi from '../../api/workerDocumentApi'
 import * as catalogApi from '../../api/catalogApi'
 import { useAuth } from '../../context/AuthContext'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../components/ui/dialog'
 import { Skeleton } from '../../components/ui/skeleton'
+import { formatDate } from '@/lib/utils'
 
 const inputCls = 'flex h-9 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50'
 
@@ -19,7 +20,6 @@ function StatusBadge({ status }) {
   const cfg = STATUS_CONFIG[status] ?? { label: status, cls: 'bg-secondary text-secondary-foreground' }
   return <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${cfg.cls}`}>{cfg.label}</span>
 }
-function fmt(d) { if (!d) return null; return new Date(d).toLocaleDateString('es-ES') }
 
 // ── Upload dialog ─────────────────────────────────────────────────────────────
 function UploadDialog({ open, onOpenChange, docTypes, onSuccess }) {
@@ -190,7 +190,7 @@ export default function MyDocumentsPage() {
 
               {doc.expiryDate && (
                 <p className={`text-xs ${doc.expiringSoon ? 'text-orange-600 font-semibold' : 'text-muted-foreground'}`}>
-                  {doc.expiringSoon && '⚠ '}Caduca: {fmt(doc.expiryDate)}
+                  {doc.expiringSoon && '⚠ '}Caduca: {formatDate(doc.expiryDate)}
                   {doc.expiringSoon && ' — ¡Caduca pronto!'}
                 </p>
               )}

@@ -3,6 +3,7 @@ import { toast } from 'sonner'
 import { Plus, Loader2, AlertTriangle } from 'lucide-react'
 import * as incidentApi from '../../api/incidentApi'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../components/ui/dialog'
+import { formatDate } from '@/lib/utils'
 
 const inputCls = 'flex h-9 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50'
 const textareaCls = 'flex min-h-[80px] w-full rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
@@ -29,7 +30,6 @@ function SevBadge({ sev }) {
 function StatusBadge({ status }) {
   return <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_BADGE[status] ?? ''}`}>{STATUS_LABEL[status] ?? status}</span>
 }
-function fmt(dt) { if (!dt) return '—'; return new Date(dt).toLocaleDateString('es-ES') }
 
 // ── Create dialog ─────────────────────────────────────────────────────────────
 const EMPTY = { title: '', description: '', type: 'SAFETY_RISK', severity: 'LOW', location: '' }
@@ -117,7 +117,7 @@ function HistoryDialog({ open, onOpenChange, incident }) {
                   <div className="pb-3 space-y-0.5">
                     <StatusBadge status={h.newStatus} />
                     {h.comment && <p className="text-sm text-muted-foreground">{h.comment}</p>}
-                    <p className="text-xs text-muted-foreground">{h.changedByName ?? '—'} · {fmt(h.changedAt)}</p>
+                    <p className="text-xs text-muted-foreground">{h.changedByName ?? '—'} · {formatDate(h.changedAt)}</p>
                   </div>
                 </li>
               ))}
@@ -183,7 +183,7 @@ export default function MyIncidentsPage() {
 
               <div className="text-xs text-muted-foreground space-y-0.5">
                 <p>Ubicación: <span className="text-foreground">{inc.location ?? '—'}</span></p>
-                <p>Fecha: {fmt(inc.createdAt)}</p>
+                <p>Fecha: {formatDate(inc.createdAt)}</p>
                 {inc.assignedToName && <p>Asignado a: <span className="text-foreground">{inc.assignedToName}</span></p>}
               </div>
 

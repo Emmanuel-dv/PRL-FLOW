@@ -1,11 +1,12 @@
 import { useEffect, useState, useMemo } from 'react'
 import { toast } from 'sonner'
-import { Plus, Loader2, AlertTriangle, Clock, CheckCircle2, XCircle } from 'lucide-react'
+import { Plus, Loader2 } from 'lucide-react'
 import * as incidentApi from '../../api/incidentApi'
 import * as userApi from '../../api/userApi'
 import { useAuth } from '../../context/AuthContext'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../components/ui/dialog'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/table'
+import { formatDate } from '@/lib/utils'
 
 // ── Shared style helpers ───────────────────────────────────────────────────────
 const inputCls = 'flex h-9 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50'
@@ -36,7 +37,6 @@ function StatusBadge({ status }) {
 function Field({ label, children }) {
   return <div className="space-y-1.5"><label className="text-sm font-medium leading-none">{label}</label>{children}</div>
 }
-function fmt(dt) { if (!dt) return '—'; return new Date(dt).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) }
 
 // ── Create incident dialog ─────────────────────────────────────────────────────
 const EMPTY_INC = { title: '', description: '', type: 'SAFETY_RISK', severity: 'LOW', location: '' }
@@ -112,7 +112,7 @@ function DetailDialog({ open, onOpenChange, incident }) {
             <div><p className="text-xs font-medium text-foreground">Reportado por</p><p>{incident.reportedByName ?? '—'}</p></div>
             <div><p className="text-xs font-medium text-foreground">Asignado a</p><p>{incident.assignedToName ?? 'Sin asignar'}</p></div>
             <div><p className="text-xs font-medium text-foreground">Ubicación</p><p>{incident.location ?? '—'}</p></div>
-            <div><p className="text-xs font-medium text-foreground">Fecha</p><p>{fmt(incident.createdAt)}</p></div>
+            <div><p className="text-xs font-medium text-foreground">Fecha</p><p>{formatDate(incident.createdAt)}</p></div>
           </div>
           {incident.description && (
             <div><p className="text-xs font-medium">Descripción</p><p className="text-muted-foreground">{incident.description}</p></div>
@@ -130,7 +130,7 @@ function DetailDialog({ open, onOpenChange, incident }) {
                     <div className="pb-3 space-y-0.5">
                       <StatusBadge status={h.newStatus} />
                       {h.comment && <p className="text-muted-foreground">{h.comment}</p>}
-                      <p className="text-xs text-muted-foreground">{h.changedByName ?? '—'} · {fmt(h.changedAt)}</p>
+                      <p className="text-xs text-muted-foreground">{h.changedByName ?? '—'} · {formatDate(h.changedAt)}</p>
                     </div>
                   </li>
                 ))}
@@ -293,7 +293,7 @@ export default function IncidentsPage() {
                   <TableCell className="text-muted-foreground text-xs">{inc.location ?? '—'}</TableCell>
                   <TableCell className="text-muted-foreground text-xs">{inc.reportedByName ?? '—'}</TableCell>
                   <TableCell className="text-muted-foreground text-xs">{inc.assignedToName ?? '—'}</TableCell>
-                  <TableCell className="text-muted-foreground text-xs">{fmt(inc.createdAt)}</TableCell>
+                  <TableCell className="text-muted-foreground text-xs">{formatDate(inc.createdAt)}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                       <button onClick={() => setDetailInc(inc)} className="inline-flex h-8 items-center rounded-lg border border-input px-3 text-xs hover:bg-accent">Ver</button>

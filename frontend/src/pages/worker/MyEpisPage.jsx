@@ -3,6 +3,7 @@ import { toast } from 'sonner'
 import { Loader2, ShieldCheck } from 'lucide-react'
 import * as epiApi from '../../api/epiApi'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../components/ui/dialog'
+import { formatDate } from '@/lib/utils'
 
 const STATUS_BADGE = {
   PENDING:   'bg-secondary text-secondary-foreground',
@@ -14,7 +15,6 @@ const STATUS_LABEL = { PENDING: 'Pendiente', DELIVERED: 'Entregado', CONFIRMED: 
 function StatusBadge({ status }) {
   return <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_BADGE[status] ?? 'bg-secondary text-secondary-foreground'}`}>{STATUS_LABEL[status] ?? status}</span>
 }
-function fmt(dt) { if (!dt) return '—'; return new Date(dt).toLocaleDateString('es-ES') }
 
 // ── Confirm reception dialog ──────────────────────────────────────────────────
 function ConfirmDialog({ open, onOpenChange, delivery, onConfirm, saving }) {
@@ -110,10 +110,10 @@ export default function MyEpisPage() {
 
               <div className="text-xs text-muted-foreground space-y-0.5 border-t border-border pt-2">
                 <p>Entregado por: <span className="text-foreground">{d.managerName ?? '—'}</span></p>
-                <p>Fecha apertura: {fmt(d.createdAt)}</p>
+                <p>Fecha apertura: {formatDate(d.createdAt)}</p>
                 {d.status === 'CONFIRMED' && (
                   <>
-                    <p>Confirmado: {fmt(d.confirmedAt)}</p>
+                    <p>Confirmado: {formatDate(d.confirmedAt)}</p>
                     {d.confirmationHash && <p className="font-mono">Hash: {d.confirmationHash.substring(0, 8)}...</p>}
                   </>
                 )}

@@ -29,6 +29,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class JobPositionServiceImpl implements com.prl.backend.service.JobPositionService {
 
     private final JobPositionRepository jobPositionRepository;
@@ -61,11 +62,13 @@ public class JobPositionServiceImpl implements com.prl.backend.service.JobPositi
     }
 
     @Override
+    @Transactional(readOnly = true)
     public JobPositionResponse getById(Long id) {
         return jobPositionMapper.toResponse(findOwnedPosition(id));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<JobPositionResponse> getAllByCompany() {
         Long companyId = securityUtils.getCurrentCompanyId();
         return jobPositionMapper.toResponseList(
@@ -152,6 +155,7 @@ public class JobPositionServiceImpl implements com.prl.backend.service.JobPositi
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<PositionDocumentReqResponse> getDocumentRequirements(Long jobPositionId) {
         findOwnedPosition(jobPositionId);
         return positionDocumentReqMapper.toResponseList(
@@ -159,6 +163,7 @@ public class JobPositionServiceImpl implements com.prl.backend.service.JobPositi
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<PositionEpiReqResponse> getEpiRequirements(Long jobPositionId) {
         findOwnedPosition(jobPositionId);
         return positionEpiReqMapper.toResponseList(

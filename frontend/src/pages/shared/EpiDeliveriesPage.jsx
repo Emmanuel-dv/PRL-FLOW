@@ -7,6 +7,7 @@ import * as catalogApi from '../../api/catalogApi'
 import { useAuth } from '../../context/AuthContext'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../components/ui/dialog'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/table'
+import { formatDate } from '@/lib/utils'
 
 const inputCls = 'flex h-9 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50'
 const STATUS_BADGE = {
@@ -19,7 +20,6 @@ const STATUS_LABEL = { PENDING: 'Pendiente', DELIVERED: 'Entregado', CONFIRMED: 
 function StatusBadge({ status }) {
   return <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_BADGE[status] ?? 'bg-secondary text-secondary-foreground'}`}>{STATUS_LABEL[status] ?? status}</span>
 }
-function fmt(dt) { if (!dt) return '—'; return new Date(dt).toLocaleDateString('es-ES') }
 function epiSummary(items) { return (items ?? []).map((i) => `${i.epiName ?? i.epiCatalog?.name}${i.quantityDelivered > 1 ? ` x${i.quantityDelivered}` : ''}`).join(', ') || '—' }
 
 // ── Create delivery dialog (MANAGER) ─────────────────────────────────────────
@@ -114,9 +114,9 @@ function DetailDialog({ open, onOpenChange, delivery }) {
           <div className="grid grid-cols-2 gap-3 text-muted-foreground">
             <div><p className="text-xs font-medium text-foreground">Trabajador</p><p>{delivery.workerName ?? '—'}</p></div>
             <div><p className="text-xs font-medium text-foreground">Manager</p><p>{delivery.managerName ?? '—'}</p></div>
-            <div><p className="text-xs font-medium text-foreground">Fecha apertura</p><p>{fmt(delivery.createdAt)}</p></div>
+            <div><p className="text-xs font-medium text-foreground">Fecha apertura</p><p>{formatDate(delivery.createdAt)}</p></div>
             {delivery.status === 'CONFIRMED' && (
-              <div><p className="text-xs font-medium text-foreground">Fecha confirmación</p><p>{fmt(delivery.confirmedAt)}</p></div>
+              <div><p className="text-xs font-medium text-foreground">Fecha confirmación</p><p>{formatDate(delivery.confirmedAt)}</p></div>
             )}
           </div>
           <div>
@@ -279,7 +279,7 @@ export default function EpiDeliveriesPage() {
                   <TableCell className="text-muted-foreground">{d.managerName ?? '—'}</TableCell>
                   <TableCell><StatusBadge status={d.status} /></TableCell>
                   <TableCell className="max-w-[200px] truncate text-xs text-muted-foreground">{epiSummary(d.items)}</TableCell>
-                  <TableCell className="text-muted-foreground text-xs">{fmt(d.createdAt)}</TableCell>
+                  <TableCell className="text-muted-foreground text-xs">{formatDate(d.createdAt)}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                       <button onClick={() => setDetailDel(d)} className="inline-flex h-8 items-center rounded-lg border border-input px-3 text-xs hover:bg-accent">Ver</button>

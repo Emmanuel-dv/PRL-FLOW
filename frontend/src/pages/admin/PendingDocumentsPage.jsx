@@ -1,27 +1,11 @@
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
-import { Loader2, ExternalLink, CheckCircle2, XCircle } from "lucide-react";
-import * as workerDocumentApi from "../../api/workerDocumentApi";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "../../components/ui/dialog";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../../components/ui/table";
+import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
+import { Loader2, ExternalLink, CheckCircle2, XCircle } from 'lucide-react'
+import * as workerDocumentApi from '../../api/workerDocumentApi'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../components/ui/dialog'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/table'
+import { formatDate } from '@/lib/utils'
 
-function fmt(d) {
-  if (!d) return "—";
-  return new Date(d).toLocaleDateString("es-ES");
-}
 
 // ── Review dialog ──────────────────────────────────────────────────────────────
 function ReviewDialog({ open, onOpenChange, doc, action, onSuccess }) {
@@ -219,10 +203,10 @@ export default function PendingDocumentsPage() {
                     </TableCell>
                     <TableCell>{doc.documentTypeName ?? "—"}</TableCell>
                     <TableCell className="text-muted-foreground">
-                      {fmt(doc.uploadedAt ?? doc.createdAt)}
+                      {formatDate(doc.uploadedAt ?? doc.createdAt)}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
-                      {fmt(doc.expiryDate)}
+                      {formatDate(doc.expiryDate)}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">

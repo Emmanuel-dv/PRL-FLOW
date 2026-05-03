@@ -23,7 +23,7 @@ function PositionFormDialog({ open, onOpenChange, editItem, onSuccess }) {
       if (editItem) { await jobPositionApi.update(editItem.id, form); toast.success('Puesto actualizado') }
       else { await jobPositionApi.create(form); toast.success('Puesto creado') }
       onSuccess(); onOpenChange(false)
-    } catch (err) { toast.error(err.response?.data?.message ?? 'Error al guardar') }
+    } catch (err) { toast.error(err.response?.data?.message || err.message || 'Error al guardar') }
     finally { setSaving(false) }
   }
 
@@ -74,7 +74,7 @@ function RequirementsDialog({ open, onOpenChange, position, docTypes, epiCatalog
         jobPositionApi.getEpis(position.id),
       ])
         .then(([d, e]) => { setDocs(d); setEpis(e) })
-        .catch(() => toast.error('Error al cargar requisitos'))
+        .catch((err) => toast.error(err.response?.data?.message || err.message || 'Error al cargar requisitos'))
         .finally(() => setLoadingReqs(false))
     }
   }, [open, position])
@@ -86,7 +86,7 @@ function RequirementsDialog({ open, onOpenChange, position, docTypes, epiCatalog
       await jobPositionApi.assignDocument(position.id, { documentTypeId: Number(newDocId), mandatory: newDocMandatory })
       const d = await jobPositionApi.getDocuments(position.id)
       setDocs(d); setNewDocId(''); toast.success('Documento añadido')
-    } catch (err) { toast.error(err.response?.data?.message ?? 'Error al añadir') }
+    } catch (err) { toast.error(err.response?.data?.message || err.message || 'Error al añadir documento') }
     finally { setAddingDoc(false) }
   }
 
@@ -97,7 +97,7 @@ function RequirementsDialog({ open, onOpenChange, position, docTypes, epiCatalog
       await jobPositionApi.assignEpi(position.id, { epiCatalogId: Number(newEpiId), quantityRequired: parseInt(newEpiQty, 10) })
       const e = await jobPositionApi.getEpis(position.id)
       setEpis(e); setNewEpiId(''); setNewEpiQty(1); toast.success('EPI añadido')
-    } catch (err) { toast.error(err.response?.data?.message ?? 'Error al añadir') }
+    } catch (err) { toast.error(err.response?.data?.message || err.message || 'Error al añadir EPI') }
     finally { setAddingEpi(false) }
   }
 
