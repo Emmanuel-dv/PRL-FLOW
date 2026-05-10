@@ -10,7 +10,7 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface NotificationMapper {
 
-    @Mapping(target = "isRead", source = "read")
+    @Mapping(target = "read", source = "read")
     @Mapping(target = "type", expression = "java(notification.getType().name())")
     NotificationResponse toResponse(Notification notification);
 

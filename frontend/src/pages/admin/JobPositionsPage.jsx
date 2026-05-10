@@ -94,7 +94,7 @@ function RequirementsDialog({ open, onOpenChange, position, docTypes, epiCatalog
     if (!newEpiId) return
     setAddingEpi(true)
     try {
-      await jobPositionApi.assignEpi(position.id, { epiCatalogId: Number(newEpiId), quantityRequired: parseInt(newEpiQty, 10) })
+      await jobPositionApi.assignEpi(position.id, { epiCatalogId: Number(newEpiId), quantity: parseInt(newEpiQty, 10) || 1 })
       const e = await jobPositionApi.getEpis(position.id)
       setEpis(e); setNewEpiId(''); setNewEpiQty(1); toast.success('EPI añadido')
     } catch (err) { toast.error(err.response?.data?.message || err.message || 'Error al añadir EPI') }
@@ -150,8 +150,8 @@ function RequirementsDialog({ open, onOpenChange, position, docTypes, epiCatalog
                 {epis.length === 0 && <li className="text-xs text-muted-foreground">Sin EPIs asignados.</li>}
                 {epis.map((e) => (
                   <li key={e.id} className="flex items-center justify-between rounded-lg border border-border px-3 py-2 text-sm">
-                    <span>{e.epiName ?? e.epiCatalog?.name}</span>
-                    <span className="ml-2 shrink-0 rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">{e.quantityRequired} ud.</span>
+                    <span>{e.epiCatalogName ?? '—'}</span>
+                    <span className="ml-2 shrink-0 rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">{e.quantity ?? e.quantityRequired ?? '?'} ud.</span>
                   </li>
                 ))}
               </ul>

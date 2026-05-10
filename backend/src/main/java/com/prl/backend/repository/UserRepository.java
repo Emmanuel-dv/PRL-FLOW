@@ -3,6 +3,8 @@ package com.prl.backend.repository;
 import com.prl.backend.entity.User;
 import com.prl.backend.entity.enums.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -18,6 +20,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmail(String email);
 
     List<User> findByCompanyIdAndActiveTrue(Long companyId);
+
+    @Query("SELECT u FROM User u " +
+            "LEFT JOIN FETCH u.company " +
+            "LEFT JOIN FETCH u.jobPosition " +
+            "LEFT JOIN FETCH u.manager " +
+            "WHERE u.company.id = :companyId AND u.active = true")
+    List<User> findByCompanyIdWithRelations(@Param("companyId") Long companyId);
 
     List<User> findByCompany_IdAndRole(Long companyId, Role role);
 

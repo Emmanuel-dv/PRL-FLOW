@@ -6,7 +6,7 @@ import * as userApi from '../../api/userApi'
 import { useAuth } from '../../context/AuthContext'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../components/ui/dialog'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/table'
-import { formatDate } from '@/lib/utils'
+import { formatDate, formatDateTime } from '@/lib/utils'
 
 // ── Shared style helpers ───────────────────────────────────────────────────────
 const inputCls = 'flex h-9 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50'
@@ -293,7 +293,7 @@ export default function IncidentsPage() {
                   <TableCell className="text-muted-foreground text-xs">{inc.location ?? '—'}</TableCell>
                   <TableCell className="text-muted-foreground text-xs">{inc.reportedByName ?? '—'}</TableCell>
                   <TableCell className="text-muted-foreground text-xs">{inc.assignedToName ?? '—'}</TableCell>
-                  <TableCell className="text-muted-foreground text-xs">{formatDate(inc.createdAt)}</TableCell>
+                  <TableCell className="text-muted-foreground text-xs">{formatDateTime(inc.createdAt)}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                       <button onClick={() => setDetailInc(inc)} className="inline-flex h-8 items-center rounded-lg border border-input px-3 text-xs hover:bg-accent">Ver</button>

@@ -58,7 +58,7 @@ function UserFormDialog({ open, onOpenChange, editUser, managers, positions, onS
       name: form.name, email: form.email, role: form.role,
       managerId: form.managerId ? Number(form.managerId) : null,
       jobPositionId: form.jobPositionId ? Number(form.jobPositionId) : null,
-      ...(editUser ? {} : { password: form.password }),
+      ...(editUser ? { active: editUser.active } : { password: form.password }),
     }
     try {
       if (editUser) { await userApi.update(editUser.id, payload); toast.success('Usuario actualizado') }

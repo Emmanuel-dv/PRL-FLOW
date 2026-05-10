@@ -27,13 +27,13 @@ public class DocumentTypeController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<DocumentTypeResponse>> getAllByCompany() {
         return ResponseEntity.ok(documentTypeService.getAllByCompany());
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<DocumentTypeResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(documentTypeService.getById(id));
     }

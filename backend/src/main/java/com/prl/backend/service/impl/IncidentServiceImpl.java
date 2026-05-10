@@ -100,9 +100,8 @@ public class IncidentServiceImpl implements IncidentService {
 
         if (currentUser.getRole() == Role.WORKER) {
             incidents = incidentRepository.findByReportedBy_IdOrderByCreatedAtDesc(currentUser.getId());
-        } else if (currentUser.getRole() == Role.MANAGER) {
-            incidents = incidentRepository.findByAssignedTo_IdOrderByCreatedAtDesc(currentUser.getId());
         } else {
+            // MANAGER and ADMIN both see all company incidents
             incidents = incidentRepository.findByCompany_IdOrderByCreatedAtDesc(currentUser.getCompany().getId());
         }
 
@@ -149,10 +148,23 @@ public class IncidentServiceImpl implements IncidentService {
         incident.setStatus(request.getNewStatus());
 
         if (request.getAssignedToId() != null) {
-            User assignedTo = userRepository.findById(request.getAssignedToId())
+            User newAssignee = userRepository.findById(request.getAssignedToId())
                     .orElseThrow(() -> new EntityNotFoundException(
                             "Usuario no encontrado: " + request.getAssignedToId()));
-            incident.setAssignedTo(assignedTo);
+
+            boolean assigneeChanged = incident.getAssignedTo() == null
+                    || !incident.getAssignedTo().getId().equals(request.getAssignedToId());
+
+            incident.setAssignedTo(newAssignee);
+
+            if (assigneeChanged) {
+                notificationService.create(
+                        newAssignee,
+                        NotificationType.INCIDENT_ASSIGNED,
+                        "Incidencia asignada a ti",
+                        "Se te ha asignado la incidencia: " + incident.getTitle(),
+                        "INCIDENT", incident.getId());
+            }
         }
 
         if (request.getNewStatus() == IncidentStatus.RESOLVED) {
@@ -160,15 +172,6 @@ public class IncidentServiceImpl implements IncidentService {
         }
 
         final Incident updatedIncident = incidentRepository.save(incident);
-
-        if (request.getAssignedToId() != null && updatedIncident.getAssignedTo() != null) {
-            notificationService.create(
-                    updatedIncident.getAssignedTo(),
-                    NotificationType.INCIDENT_ASSIGNED,
-                    "Incidencia asignada a ti",
-                    "Se te ha asignado la incidencia: " + updatedIncident.getTitle(),
-                    "INCIDENT", updatedIncident.getId());
-        }
 
         IncidentStatusLog log = IncidentStatusLog.builder()
                 .incident(updatedIncident)

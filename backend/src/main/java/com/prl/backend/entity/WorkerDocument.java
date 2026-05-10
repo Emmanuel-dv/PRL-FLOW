@@ -29,7 +29,7 @@ public class WorkerDocument {
     private DocumentType documentType;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "file_metadata_id", nullable = false)
+    @JoinColumn(name = "file_metadata_id", nullable = true)
     private FileMetadata fileMetadata;
 
     private LocalDate issueDate;

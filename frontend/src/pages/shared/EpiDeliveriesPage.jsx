@@ -20,7 +20,7 @@ const STATUS_LABEL = { PENDING: 'Pendiente', DELIVERED: 'Entregado', CONFIRMED: 
 function StatusBadge({ status }) {
   return <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_BADGE[status] ?? 'bg-secondary text-secondary-foreground'}`}>{STATUS_LABEL[status] ?? status}</span>
 }
-function epiSummary(items) { return (items ?? []).map((i) => `${i.epiName ?? i.epiCatalog?.name}${i.quantityDelivered > 1 ? ` x${i.quantityDelivered}` : ''}`).join(', ') || '—' }
+function epiSummary(items) { return (items ?? []).map((i) => `${i.epiCatalogName ?? i.epiName ?? '?'}${i.quantityDelivered > 1 ? ` x${i.quantityDelivered}` : ''}`).join(', ') || '—' }
 
 // ── Create delivery dialog (MANAGER) ─────────────────────────────────────────
 function CreateDeliveryDialog({ open, onOpenChange, workers, epiCatalog, onSuccess }) {
@@ -46,11 +46,11 @@ function CreateDeliveryDialog({ open, onOpenChange, workers, epiCatalog, onSucce
       await epiApi.create({
         workerId: Number(workerId),
         notes: notes || null,
-        items: items.map((it) => ({ epiCatalogId: Number(it.epiCatalogId), quantityDelivered: Number(it.quantity) })),
+        items: items.map((it) => ({ epiCatalogId: Number(it.epiCatalogId), quantityDelivered: parseInt(it.quantity, 10) || 1 })),
       })
       toast.success('Entrega creada')
       onSuccess(); onOpenChange(false)
-    } catch (err) { toast.error(err.response?.data?.message ?? 'Error al crear entrega') }
+    } catch (err) { toast.error(err.response?.data?.message || err.message || 'Error al crear entrega') }
     finally { setSaving(false) }
   }
 

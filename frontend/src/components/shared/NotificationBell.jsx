@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Bell } from 'lucide-react'
 import * as notificationApi from '../../api/notificationApi'
 
-const POLL_MS = 60_000
+const POLL_MS = 5_000
 
 export default function NotificationBell() {
   const navigate = useNavigate()

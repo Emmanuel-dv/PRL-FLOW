@@ -11,16 +11,19 @@ import com.prl.backend.mapper.UserMapper;
 import com.prl.backend.repository.CompanyRepository;
 import com.prl.backend.repository.JobPositionRepository;
 import com.prl.backend.repository.UserRepository;
+import com.prl.backend.security.SecurityUtils;
 import com.prl.backend.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
@@ -28,6 +31,7 @@ public class UserServiceImpl implements UserService {
     private final JobPositionRepository jobPositionRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
+    private final SecurityUtils securityUtils;
 
     @Override
     public UserResponse create(CreateUserRequest request, Long companyId) {
@@ -69,8 +73,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<UserResponse> getAllByCompany(Long companyId) {
-        return userMapper.toResponseList(userRepository.findByCompanyIdAndActiveTrue(companyId));
+        return userMapper.toResponseList(userRepository.findByCompanyIdWithRelations(companyId));
     }
 
     @Override
@@ -108,6 +113,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deactivate(Long id) {
+        User currentUser = securityUtils.getCurrentUser();
+        if (currentUser.getId().equals(id)) {
+            throw new IllegalArgumentException("No puedes desactivarte a ti mismo");
+        }
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado con id: " + id));
         user.setActive(false);
@@ -115,3 +124,4 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 }
+

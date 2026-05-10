@@ -159,7 +159,7 @@ public class JobPositionServiceImpl implements com.prl.backend.service.JobPositi
     public List<PositionDocumentReqResponse> getDocumentRequirements(Long jobPositionId) {
         findOwnedPosition(jobPositionId);
         return positionDocumentReqMapper.toResponseList(
-                positionDocumentReqRepository.findByJobPositionIdAndActiveTrue(jobPositionId));
+                positionDocumentReqRepository.findByJobPositionIdWithRelations(jobPositionId));
     }
 
     @Override
@@ -167,7 +167,7 @@ public class JobPositionServiceImpl implements com.prl.backend.service.JobPositi
     public List<PositionEpiReqResponse> getEpiRequirements(Long jobPositionId) {
         findOwnedPosition(jobPositionId);
         return positionEpiReqMapper.toResponseList(
-                positionEpiReqRepository.findByJobPositionIdAndActiveTrue(jobPositionId));
+                positionEpiReqRepository.findByJobPositionIdWithRelations(jobPositionId));
     }
 
     private JobPosition findOwnedPosition(Long id) {

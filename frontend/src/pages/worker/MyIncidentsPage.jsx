@@ -3,7 +3,7 @@ import { toast } from 'sonner'
 import { Plus, Loader2, AlertTriangle } from 'lucide-react'
 import * as incidentApi from '../../api/incidentApi'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../components/ui/dialog'
-import { formatDate } from '@/lib/utils'
+import { formatDate, formatDateTime } from '@/lib/utils'
 
 const inputCls = 'flex h-9 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50'
 const textareaCls = 'flex min-h-[80px] w-full rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
@@ -183,7 +183,7 @@ export default function MyIncidentsPage() {
 
               <div className="text-xs text-muted-foreground space-y-0.5">
                 <p>Ubicación: <span className="text-foreground">{inc.location ?? '—'}</span></p>
-                <p>Fecha: {formatDate(inc.createdAt)}</p>
+                <p>Fecha: {formatDateTime(inc.createdAt)}</p>
                 {inc.assignedToName && <p>Asignado a: <span className="text-foreground">{inc.assignedToName}</span></p>}
               </div>
 

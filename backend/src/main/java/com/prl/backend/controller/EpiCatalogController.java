@@ -27,13 +27,13 @@ public class EpiCatalogController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<EpiCatalogResponse>> getAllByCompany() {
         return ResponseEntity.ok(epiCatalogService.getAllByCompany());
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<EpiCatalogResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(epiCatalogService.getById(id));
     }

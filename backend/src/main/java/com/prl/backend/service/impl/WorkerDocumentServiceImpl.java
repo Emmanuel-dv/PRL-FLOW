@@ -6,7 +6,6 @@ import com.prl.backend.dto.response.WorkerDocumentResponse;
 import com.prl.backend.entity.*;
 import com.prl.backend.entity.enums.DocumentStatus;
 import com.prl.backend.entity.enums.NotificationType;
-import com.prl.backend.entity.enums.Role;
 import com.prl.backend.mapper.WorkerDocumentMapper;
 import com.prl.backend.repository.DocumentTypeRepository;
 import com.prl.backend.repository.PositionDocumentReqRepository;
@@ -139,10 +138,6 @@ public class WorkerDocumentServiceImpl implements WorkerDocumentService {
     public WorkerDocumentResponse review(Long id, ReviewDocumentRequest request) {
         User reviewer = securityUtils.getCurrentUser();
 
-        if (reviewer.getRole() != Role.ADMIN) {
-            throw new IllegalArgumentException("Solo un ADMIN puede revisar documentos.");
-        }
-
         if (request.getStatus() != DocumentStatus.APPROVED
                 && request.getStatus() != DocumentStatus.REJECTED) {
             throw new IllegalArgumentException(
@@ -161,7 +156,7 @@ public class WorkerDocumentServiceImpl implements WorkerDocumentService {
                         "Documento no encontrado: " + id));
 
         if (!doc.getWorker().getCompany().getId().equals(reviewer.getCompany().getId())) {
-            throw new IllegalArgumentException("El documento no pertenece a su empresa.");
+            throw new AccessDeniedException("No tienes acceso a este documento");
         }
 
         doc.setStatus(request.getStatus());

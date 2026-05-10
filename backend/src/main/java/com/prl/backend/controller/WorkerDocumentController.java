@@ -51,7 +51,7 @@ public class WorkerDocumentController {
     }
 
     @PutMapping("/{id}/review")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public ResponseEntity<WorkerDocumentResponse> review(
             @PathVariable Long id,
             @Valid @RequestBody ReviewDocumentRequest request) {

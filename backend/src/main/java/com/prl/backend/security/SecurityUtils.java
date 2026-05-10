@@ -21,8 +21,10 @@ public class SecurityUtils {
         String email = authentication.getName();
         log.debug("getCurrentUser() → email from JWT: '{}'", email);
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Usuario autenticado no encontrado: " + email));
+                .orElseThrow(() -> {
+                    log.warn("getCurrentUser() → usuario no encontrado para email: '{}'", email);
+                    return new EntityNotFoundException("Usuario autenticado no encontrado: " + email);
+                });
     }
 
     public Long getCurrentCompanyId() {

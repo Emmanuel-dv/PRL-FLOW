@@ -26,7 +26,7 @@ function typeIcon(type = '') {
 // ── Notification card ─────────────────────────────────────────────────────────
 function NotifCard({ notif, onMarkRead }) {
   const Icon = typeIcon(notif.type)
-  const unread = !notif.isRead
+  const unread = !notif.read
 
   return (
     <div
@@ -79,12 +79,12 @@ export default function NotificationsPage() {
 
   useEffect(() => { load() }, [])
 
-  const unreadCount = notifications.filter((n) => !n.isRead).length
+  const unreadCount = notifications.filter((n) => !n.read).length
 
   // Optimistic update for single mark-as-read
   const handleMarkRead = async (id) => {
     setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)),
+      prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
     )
     try { await notificationApi.markAsRead(id) }
     catch { toast.error('No se pudo marcar como leída') }
@@ -92,11 +92,17 @@ export default function NotificationsPage() {
 
   const handleMarkAll = async () => {
     setMarkingAll(true)
+    // Optimistic update — mark all as read locally before the network call
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
     try {
       await notificationApi.markAllAsRead()
+      // Reload from server to ensure consistency
       await load()
-    } catch { toast.error('Error al marcar todas como leídas') }
-    finally { setMarkingAll(false) }
+    } catch {
+      toast.error('Error al marcar todas como leídas')
+      // Revert on failure
+      await load()
+    } finally { setMarkingAll(false) }
   }
 
   return (
