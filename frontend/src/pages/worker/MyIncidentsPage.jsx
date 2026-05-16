@@ -44,7 +44,6 @@ function CreateIncidentDialog({ open, onOpenChange, onSuccess }) {
     e.preventDefault(); setSaving(true)
     try {
       await incidentApi.create(form)
-      toast.success('Incidencia reportada')
       onSuccess(); onOpenChange(false)
     } catch (err) { toast.error(err.response?.data?.message ?? 'Error al reportar') }
     finally { setSaving(false) }

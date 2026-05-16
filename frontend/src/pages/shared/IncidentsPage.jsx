@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { toast } from 'sonner'
-import { Plus, Loader2 } from 'lucide-react'
+import { Plus, Loader2, Download } from 'lucide-react'
+import { exportIncidentsPDF } from '../../lib/pdfExport'
 import * as incidentApi from '../../api/incidentApi'
 import * as userApi from '../../api/userApi'
 import { useAuth } from '../../context/AuthContext'
@@ -50,7 +51,6 @@ function CreateIncidentDialog({ open, onOpenChange, onSuccess }) {
     e.preventDefault(); setSaving(true)
     try {
       await incidentApi.create(form)
-      toast.success('Incidencia reportada')
       onSuccess(); onOpenChange(false)
     } catch (err) { toast.error(err.response?.data?.message ?? 'Error al reportar') }
     finally { setSaving(false) }
@@ -162,7 +162,6 @@ function ManageDialog({ open, onOpenChange, incident, managers, onSuccess }) {
         assignedToId: form.assignedToId ? Number(form.assignedToId) : null,
         comment: form.comment || null,
       })
-      toast.success('Estado actualizado')
       onSuccess(); onOpenChange(false)
     } catch (err) { toast.error(err.response?.data?.message ?? 'Error al actualizar') }
     finally { setSaving(false) }
@@ -239,9 +238,20 @@ export default function IncidentsPage() {
           <h1 className="text-2xl font-bold tracking-tight">Incidencias</h1>
           <p className="text-sm text-muted-foreground">{incidents.length} incidencias registradas</p>
         </div>
-        <button onClick={() => setCreateOpen(true)} className="inline-flex h-9 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90">
-          <Plus className="h-4 w-4" />Reportar incidencia
-        </button>
+        <div className="flex items-center gap-2">
+          {user?.role === 'ADMIN' && !loading && incidents.length > 0 && (
+            <button
+              onClick={() => exportIncidentsPDF(incidents, user?.companyName ?? user?.email ?? 'Empresa')}
+              className="inline-flex h-9 items-center gap-2 rounded-lg border border-input px-4 text-sm hover:bg-accent"
+            >
+              <Download className="h-4 w-4" />
+              Exportar PDF
+            </button>
+          )}
+          <button onClick={() => setCreateOpen(true)} className="inline-flex h-9 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90">
+            <Plus className="h-4 w-4" />Reportar incidencia
+          </button>
+        </div>
       </div>
 
       {isAdminOrManager && (
@@ -297,8 +307,8 @@ export default function IncidentsPage() {
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                       <button onClick={() => setDetailInc(inc)} className="inline-flex h-8 items-center rounded-lg border border-input px-3 text-xs hover:bg-accent">Ver</button>
-                      {isAdminOrManager && (
-                        <button onClick={() => setManageInc(inc)} className="inline-flex h-8 items-center rounded-lg bg-primary/10 px-3 text-xs font-medium text-primary hover:bg-primary/20">Gestionar</button>
+                      {isAdminOrManager && inc.status !== 'RESOLVED' && inc.status !== 'CLOSED' && (
+                        <button onClick={() => setManageInc(inc)} className="inline-flex h-8 items-center rounded-lg border border-input px-3 text-xs hover:bg-accent">Gestionar</button>
                       )}
                     </div>
                   </TableCell>

@@ -85,6 +85,10 @@ export default function AppRouter() {
                   </Suspense>
                 }
               />
+            </Route>
+
+            {/* ADMIN + MANAGER */}
+            <Route element={<ProtectedRoute roles={['ADMIN', 'MANAGER']} />}>
               <Route
                 path="/documents/pending"
                 element={
@@ -93,10 +97,6 @@ export default function AppRouter() {
                   </Suspense>
                 }
               />
-            </Route>
-
-            {/* ADMIN + MANAGER */}
-            <Route element={<ProtectedRoute roles={['ADMIN', 'MANAGER']} />}>
               <Route
                 path="/incidents"
                 element={

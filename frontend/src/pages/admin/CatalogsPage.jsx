@@ -25,7 +25,6 @@ function DocTypeDialog({ open, onOpenChange, onSuccess }) {
         validityDays: form.validityDays ? Number(form.validityDays) : null,
         requiresExpiryDate: form.requiresExpiryDate,
       })
-      toast.success('Tipo de documento creado')
       onSuccess(); onOpenChange(false)
     } catch (err) { toast.error(err.response?.data?.message ?? 'Error al crear') }
     finally { setSaving(false) }
@@ -74,7 +73,6 @@ function EpiDialog({ open, onOpenChange, onSuccess }) {
     setSaving(true)
     try {
       await catalogApi.createEpiCatalog({ name: form.name, referenceCode: form.referenceCode || null, description: form.description || null })
-      toast.success('EPI creado en el catálogo')
       onSuccess(); onOpenChange(false)
     } catch (err) { toast.error(err.response?.data?.message ?? 'Error al crear') }
     finally { setSaving(false) }

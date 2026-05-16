@@ -61,8 +61,8 @@ function UserFormDialog({ open, onOpenChange, editUser, managers, positions, onS
       ...(editUser ? { active: editUser.active } : { password: form.password }),
     }
     try {
-      if (editUser) { await userApi.update(editUser.id, payload); toast.success('Usuario actualizado') }
-      else { await userApi.create(payload); toast.success('Usuario creado correctamente') }
+      if (editUser) { await userApi.update(editUser.id, payload) }
+      else { await userApi.create(payload) }
       onSuccess(); onOpenChange(false)
     } catch (err) {
       const data = err.response?.data
@@ -168,7 +168,6 @@ export default function UsersPage() {
     setDeactivateLoading(true)
     try {
       await userApi.deactivate(deactivateUser.id)
-      toast.success('Usuario desactivado')
       setDeactivateUser(null)
       load()
     } catch { toast.error('Error al desactivar') }

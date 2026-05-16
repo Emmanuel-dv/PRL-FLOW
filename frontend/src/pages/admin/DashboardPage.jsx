@@ -9,8 +9,11 @@ import {
   Clock,
   Flame,
   TrendingUp,
+  Download,
 } from 'lucide-react'
 import { getDashboard } from '../../api/dashboardApi'
+import { useAuth } from '../../context/AuthContext'
+import { exportDashboardPDF } from '../../lib/pdfExport'
 import {
   Card,
   CardContent,
@@ -122,14 +125,26 @@ export default function DashboardPage() {
       .finally(() => setLoading(false))
   }, [])
 
+  const { user } = useAuth()
+
   return (
     <div className="p-6 space-y-8">
       {/* Page header */}
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground text-sm">
-          Resumen ejecutivo de seguridad y prevención laboral
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+          <p className="text-muted-foreground text-sm">
+            Resumen ejecutivo de seguridad y prevención laboral
+          </p>
+        </div>
+        <button
+          onClick={() => exportDashboardPDF(data, user?.companyName ?? user?.email ?? 'Empresa')}
+          disabled={loading || !data}
+          className="inline-flex h-9 items-center gap-2 rounded-lg border border-input px-4 text-sm hover:bg-accent disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          <Download className="h-4 w-4" />
+          Exportar PDF
+        </button>
       </div>
 
       {/* Loading */}

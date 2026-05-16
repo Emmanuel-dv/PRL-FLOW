@@ -26,7 +26,6 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
-  // If already authenticated, redirect immediately
   useEffect(() => {
     if (!authLoading && user) {
       navigate(ROLE_HOME[user.role] ?? '/', { replace: true })
@@ -44,15 +43,15 @@ export default function LoginPage() {
     } catch (err) {
       setError(
         err.response?.data?.message ||
-          err.response?.data?.error ||
-          'Credenciales incorrectas. Verifica tu email y contraseña.',
+        err.response?.data?.error ||
+        'Credenciales incorrectas. Verifica tu email y contraseña.',
       )
     } finally {
       setLoading(false)
     }
   }
 
-  // Don't render while auth context is still hydrating
+
   if (authLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -65,7 +64,7 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-[400px] space-y-6">
 
-        {/* Brand mark */}
+
         <div className="flex flex-col items-center gap-3">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary shadow-lg">
             <ShieldCheck className="h-7 w-7 text-primary-foreground" />
@@ -78,7 +77,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Login card */}
+        { }
         <Card className="rounded-2xl shadow-md">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">Iniciar sesión</CardTitle>
@@ -89,14 +88,14 @@ export default function LoginPage() {
 
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Error alert */}
+              { }
               {error && (
                 <Alert variant="destructive">
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
 
-              {/* Email */}
+              { }
               <div className="space-y-1.5">
                 <label
                   htmlFor="login-email"
@@ -117,7 +116,7 @@ export default function LoginPage() {
                 />
               </div>
 
-              {/* Password */}
+              { }
               <div className="space-y-1.5">
                 <label
                   htmlFor="login-password"
@@ -138,7 +137,7 @@ export default function LoginPage() {
                 />
               </div>
 
-              {/* Submit */}
+              { }
               <button
                 type="submit"
                 disabled={loading}

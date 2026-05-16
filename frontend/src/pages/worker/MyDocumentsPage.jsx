@@ -46,7 +46,6 @@ function UploadDialog({ open, onOpenChange, docTypes, onSuccess }) {
       })], { type: 'application/json' }))
       formData.append('file', file)
       await workerDocumentApi.upload(formData)
-      toast.success('Documento subido correctamente')
       onSuccess(); onOpenChange(false)
     } catch (err) { toast.error(err.response?.data?.message ?? 'Error al subir') }
     finally { setSaving(false) }

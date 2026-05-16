@@ -1,5 +1,6 @@
 import axiosClient from './axiosClient'
 
+//Nombrado para swagger
 export const getAllDocumentTypes = () =>
   axiosClient.get('/api/document-types').then((r) => r.data)
 

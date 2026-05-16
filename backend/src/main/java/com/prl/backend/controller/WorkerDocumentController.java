@@ -37,6 +37,12 @@ public class WorkerDocumentController {
         return ResponseEntity.ok(workerDocumentService.getMyDocuments());
     }
 
+    @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<WorkerDocumentResponse> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(workerDocumentService.getById(id));
+    }
+
     @GetMapping("/worker/{workerId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public ResponseEntity<List<WorkerDocumentResponse>> getByWorker(
@@ -59,7 +65,7 @@ public class WorkerDocumentController {
     }
 
     @GetMapping("/worker/{workerId}/compliance")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Map<String, Object>> getComplianceStatus(
             @PathVariable Long workerId) {
         return ResponseEntity.ok(workerDocumentService.getComplianceStatus(workerId));

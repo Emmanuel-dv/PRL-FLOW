@@ -143,6 +143,12 @@ public class IncidentServiceImpl implements IncidentService {
             throw new IllegalArgumentException("La incidencia no pertenece a su empresa.");
         }
 
+        if (incident.getStatus() == IncidentStatus.RESOLVED
+                || incident.getStatus() == IncidentStatus.CLOSED) {
+            throw new IllegalArgumentException(
+                    "No se puede modificar una incidencia en estado " + incident.getStatus().name());
+        }
+
         IncidentStatus oldStatus = incident.getStatus();
 
         incident.setStatus(request.getNewStatus());

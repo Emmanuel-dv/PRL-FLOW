@@ -69,8 +69,7 @@ export default function MyEpisPage() {
     if (!confirmDel) return
     setConfirmSaving(true)
     try {
-      const result = await epiApi.confirm(confirmDel.id)
-      toast.success(`Recepción confirmada. Hash: ${result.confirmationHash?.substring(0, 8) ?? ''}...`)
+      await epiApi.confirm(confirmDel.id)
       setConfirmDel(null); load()
     } catch (err) { toast.error(err.response?.data?.message ?? 'Error al confirmar') }
     finally { setConfirmSaving(false) }

@@ -45,12 +45,20 @@ function CreateDeliveryDialog({ open, onOpenChange, workers, epiCatalog, onSucce
     try {
       await epiApi.create({
         workerId: Number(workerId),
-        notes: notes || null,
-        items: items.map((it) => ({ epiCatalogId: Number(it.epiCatalogId), quantityDelivered: parseInt(it.quantity, 10) || 1 })),
+        notes: notes?.trim() || null,
+        items: items.map((it) => ({
+          epiCatalogId: Number(it.epiCatalogId),
+          quantity: parseInt(it.quantity, 10) || 1,
+        })),
       })
-      toast.success('Entrega creada')
       onSuccess(); onOpenChange(false)
-    } catch (err) { toast.error(err.response?.data?.message || err.message || 'Error al crear entrega') }
+    } catch (err) {
+      const msg = err.response?.data?.message
+        || (typeof err.response?.data === 'string' ? err.response.data : null)
+        || err.message
+        || 'Error al crear la entrega'
+      toast.error(msg)
+    }
     finally { setSaving(false) }
   }
 
@@ -214,7 +222,7 @@ export default function EpiDeliveriesPage() {
 
   const handleMarkDelivered = async (id) => {
     setActionLoading(id)
-    try { await epiApi.markDelivered(id); toast.success('Marcado como entregado'); load() }
+    try { await epiApi.markDelivered(id); load() }
     catch (err) { toast.error(err.response?.data?.message ?? 'Error') }
     finally { setActionLoading(null) }
   }
@@ -223,8 +231,7 @@ export default function EpiDeliveriesPage() {
     if (!confirmDel) return
     setConfirmSaving(true)
     try {
-      const result = await epiApi.confirm(confirmDel.id)
-      toast.success(`Recepción confirmada. Hash: ${result.confirmationHash?.substring(0, 16) ?? ''}...`)
+      await epiApi.confirm(confirmDel.id)
       setConfirmDel(null); load()
     } catch (err) { toast.error(err.response?.data?.message ?? 'Error al confirmar') }
     finally { setConfirmSaving(false) }

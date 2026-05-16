@@ -30,120 +30,118 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class DashboardServiceImpl implements DashboardService {
 
-    private final UserRepository userRepository;
-    private final WorkerDocumentRepository workerDocumentRepository;
-    private final EpiDeliveryRepository epiDeliveryRepository;
-    private final IncidentRepository incidentRepository;
-    private final NotificationRepository notificationRepository;
-    private final PositionDocumentReqRepository positionDocumentReqRepository;
-    private final SecurityUtils securityUtils;
+        private final UserRepository userRepository;
+        private final WorkerDocumentRepository workerDocumentRepository;
+        private final EpiDeliveryRepository epiDeliveryRepository;
+        private final IncidentRepository incidentRepository;
+        private final NotificationRepository notificationRepository;
+        private final PositionDocumentReqRepository positionDocumentReqRepository;
+        private final SecurityUtils securityUtils;
 
-    @Override
-    public DashboardResponse getDashboard() {
-        Long companyId = securityUtils.getCurrentCompanyId();
-        LocalDate today = LocalDate.now();
+        @Override
+        public DashboardResponse getDashboard() {
+                Long companyId = securityUtils.getCurrentCompanyId();
+                LocalDate today = LocalDate.now();
 
-        // ── Usuarios ──────────────────────────────────────────────────────────
-        long totalWorkers  = userRepository.countByCompany_IdAndRoleAndActiveTrue(companyId, Role.WORKER);
-        long totalManagers = userRepository.countByCompany_IdAndRoleAndActiveTrue(companyId, Role.MANAGER);
-        long activeUsers   = userRepository.countByCompany_IdAndActiveTrue(companyId);
+                long totalWorkers = userRepository.countByCompany_IdAndRoleAndActiveTrue(companyId, Role.WORKER);
+                long totalManagers = userRepository.countByCompany_IdAndRoleAndActiveTrue(companyId, Role.MANAGER);
+                long activeUsers = userRepository.countByCompany_IdAndActiveTrue(companyId);
 
-        // ── Documentación ────────────────────────────────────────────────────
-        long pendingReview   = workerDocumentRepository
-                .countByWorkerCompanyIdAndStatus(companyId, DocumentStatus.PENDING_REVIEW);
-        long expiredDocs     = workerDocumentRepository
-                .countByWorkerCompanyIdAndStatus(companyId, DocumentStatus.EXPIRED);
-        long expiringSoon    = workerDocumentRepository.findExpiringSoon(today, today.plusDays(30))
-                .stream()
-                .filter(d -> d.getWorker().getCompany().getId().equals(companyId))
-                .count();
+                long pendingReview = workerDocumentRepository
+                                .countByWorkerCompanyIdAndStatus(companyId, DocumentStatus.PENDING_REVIEW);
+                long expiredDocs = workerDocumentRepository
+                                .countByWorkerCompanyIdAndStatus(companyId, DocumentStatus.EXPIRED);
+                long expiringSoon = workerDocumentRepository.findExpiringSoon(today, today.plusDays(30))
+                                .stream()
+                                .filter(d -> d.getWorker().getCompany().getId().equals(companyId))
+                                .count();
 
-        long complianceRate  = computeComplianceRate(companyId, totalWorkers);
+                long complianceRate = computeComplianceRate(companyId, totalWorkers);
 
-        // ── EPIs ─────────────────────────────────────────────────────────────
-        long epiPending    = epiDeliveryRepository.countByCompanyIdAndStatus(companyId, DeliveryStatus.PENDING);
-        long epiDelivered  = epiDeliveryRepository.countByCompanyIdAndStatus(companyId, DeliveryStatus.DELIVERED);
-        long epiConfirmed  = epiDeliveryRepository.countByCompanyIdAndStatus(companyId, DeliveryStatus.CONFIRMED);
+                long epiPending = epiDeliveryRepository.countByCompanyIdAndStatus(companyId, DeliveryStatus.PENDING);
+                long epiDelivered = epiDeliveryRepository.countByCompanyIdAndStatus(companyId,
+                                DeliveryStatus.DELIVERED);
+                long epiConfirmed = epiDeliveryRepository.countByCompanyIdAndStatus(companyId,
+                                DeliveryStatus.CONFIRMED);
 
-        // ── Incidencias ───────────────────────────────────────────────────────
-        long incOpen       = incidentRepository.countByCompany_IdAndStatus(companyId, IncidentStatus.OPEN);
-        long incInProgress = incidentRepository.countByCompany_IdAndStatus(companyId, IncidentStatus.IN_PROGRESS);
-        long incCritical   = incidentRepository
-                .findByCompany_IdAndSeverity(companyId, IncidentSeverity.CRITICAL).size();
+                long incOpen = incidentRepository.countByCompany_IdAndStatus(companyId, IncidentStatus.OPEN);
+                long incInProgress = incidentRepository.countByCompany_IdAndStatus(companyId,
+                                IncidentStatus.IN_PROGRESS);
+                long incCritical = incidentRepository
+                                .findByCompany_IdAndSeverity(companyId, IncidentSeverity.CRITICAL).size();
 
-        YearMonth currentMonth = YearMonth.now();
-        LocalDateTime monthStart = currentMonth.atDay(1).atStartOfDay();
-        LocalDateTime monthEnd   = currentMonth.atEndOfMonth().atTime(23, 59, 59);
-        long incResolvedThisMonth = incidentRepository
-                .findByCompany_IdAndStatus(companyId, IncidentStatus.RESOLVED).stream()
-                .filter(i -> i.getResolvedAt() != null
-                        && !i.getResolvedAt().isBefore(monthStart)
-                        && !i.getResolvedAt().isAfter(monthEnd))
-                .count();
+                YearMonth currentMonth = YearMonth.now();
+                LocalDateTime monthStart = currentMonth.atDay(1).atStartOfDay();
+                LocalDateTime monthEnd = currentMonth.atEndOfMonth().atTime(23, 59, 59);
+                long incResolvedThisMonth = incidentRepository
+                                .findByCompany_IdAndStatus(companyId, IncidentStatus.RESOLVED).stream()
+                                .filter(i -> i.getResolvedAt() != null
+                                                && !i.getResolvedAt().isBefore(monthStart)
+                                                && !i.getResolvedAt().isAfter(monthEnd))
+                                .count();
 
-        // ── Notificaciones ────────────────────────────────────────────────────
-        Long userId = securityUtils.getCurrentUser().getId();
-        long unread = notificationRepository.countByUser_IdAndIsReadFalse(userId);
+                Long userId = securityUtils.getCurrentUser().getId();
+                long unread = notificationRepository.countByUser_IdAndIsReadFalse(userId);
 
-        return DashboardResponse.builder()
-                .totalWorkers(totalWorkers)
-                .totalManagers(totalManagers)
-                .activeUsers(activeUsers)
-                .totalDocumentsPendingReview(pendingReview)
-                .totalDocumentsExpired(expiredDocs)
-                .totalDocumentsExpiringSoon(expiringSoon)
-                .documentComplianceRate(complianceRate)
-                .totalEpiDeliveriesPending(epiPending)
-                .totalEpiDeliveriesDelivered(epiDelivered)
-                .totalEpiDeliveriesConfirmed(epiConfirmed)
-                .totalIncidentsOpen(incOpen)
-                .totalIncidentsInProgress(incInProgress)
-                .totalIncidentsCritical(incCritical)
-                .totalIncidentsResolvedThisMonth(incResolvedThisMonth)
-                .unreadNotifications(unread)
-                .build();
-    }
-
-    private long computeComplianceRate(Long companyId, long totalWorkers) {
-        if (totalWorkers == 0) {
-            return 100L;
+                return DashboardResponse.builder()
+                                .totalWorkers(totalWorkers)
+                                .totalManagers(totalManagers)
+                                .activeUsers(activeUsers)
+                                .totalDocumentsPendingReview(pendingReview)
+                                .totalDocumentsExpired(expiredDocs)
+                                .totalDocumentsExpiringSoon(expiringSoon)
+                                .documentComplianceRate(complianceRate)
+                                .totalEpiDeliveriesPending(epiPending)
+                                .totalEpiDeliveriesDelivered(epiDelivered)
+                                .totalEpiDeliveriesConfirmed(epiConfirmed)
+                                .totalIncidentsOpen(incOpen)
+                                .totalIncidentsInProgress(incInProgress)
+                                .totalIncidentsCritical(incCritical)
+                                .totalIncidentsResolvedThisMonth(incResolvedThisMonth)
+                                .unreadNotifications(unread)
+                                .build();
         }
 
-        List<User> workers = userRepository.findByCompanyIdAndActiveTrue(companyId)
-                .stream()
-                .filter(u -> u.getRole() == Role.WORKER)
-                .toList();
+        private long computeComplianceRate(Long companyId, long totalWorkers) {
+                if (totalWorkers == 0) {
+                        return 100L;
+                }
 
-        long compliantWorkers = 0L;
-        for (User worker : workers) {
-            if (worker.getJobPosition() == null) {
-                compliantWorkers++;
-                continue;
-            }
+                List<User> workers = userRepository.findByCompanyIdAndActiveTrue(companyId)
+                                .stream()
+                                .filter(u -> u.getRole() == Role.WORKER)
+                                .toList();
 
-            long mandatory = positionDocumentReqRepository
-                    .findByJobPositionIdAndActiveTrue(worker.getJobPosition().getId())
-                    .stream()
-                    .filter(r -> r.isMandatory())
-                    .count();
+                long compliantWorkers = 0L;
+                for (User worker : workers) {
+                        if (worker.getJobPosition() == null) {
+                                compliantWorkers++;
+                                continue;
+                        }
 
-            if (mandatory == 0) {
-                compliantWorkers++;
-                continue;
-            }
+                        long mandatory = positionDocumentReqRepository
+                                        .findByJobPositionIdAndActiveTrue(worker.getJobPosition().getId())
+                                        .stream()
+                                        .filter(r -> r.isMandatory())
+                                        .count();
 
-            List<WorkerDocument> docs = workerDocumentRepository.findByWorkerId(worker.getId());
-            long approved = docs.stream()
-                    .filter(d -> d.getStatus() == DocumentStatus.APPROVED)
-                    .map(d -> d.getDocumentType().getId())
-                    .distinct()
-                    .count();
+                        if (mandatory == 0) {
+                                compliantWorkers++;
+                                continue;
+                        }
 
-            if (approved >= mandatory) {
-                compliantWorkers++;
-            }
+                        List<WorkerDocument> docs = workerDocumentRepository.findByWorkerId(worker.getId());
+                        long approved = docs.stream()
+                                        .filter(d -> d.getStatus() == DocumentStatus.APPROVED)
+                                        .map(d -> d.getDocumentType().getId())
+                                        .distinct()
+                                        .count();
+
+                        if (approved >= mandatory) {
+                                compliantWorkers++;
+                        }
+                }
+
+                return (compliantWorkers * 100L) / totalWorkers;
         }
-
-        return (compliantWorkers * 100L) / totalWorkers;
-    }
 }

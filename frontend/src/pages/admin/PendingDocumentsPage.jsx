@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import { Loader2, ExternalLink, CheckCircle2, XCircle } from 'lucide-react'
+import { Loader2, ExternalLink, CheckCircle2, XCircle, Download } from 'lucide-react'
 import * as workerDocumentApi from '../../api/workerDocumentApi'
+import { useAuth } from '../../context/AuthContext'
+import { exportPendingDocumentsPDF } from '../../lib/pdfExport'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../components/ui/dialog'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/table'
 import { formatDate } from '@/lib/utils'
@@ -26,7 +28,6 @@ function ReviewDialog({ open, onOpenChange, doc, action, onSuccess }) {
         status: action,
         rejectionReason: isApprove ? null : reason,
       });
-      toast.success(isApprove ? "Documento aprobado" : "Documento rechazado");
       onSuccess();
       onOpenChange(false);
     } catch (err) {
@@ -108,6 +109,7 @@ function ReviewDialog({ open, onOpenChange, doc, action, onSuccess }) {
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function PendingDocumentsPage() {
+  const { user } = useAuth()
   const [docs, setDocs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [viewLoading, setViewLoading] = useState(null);
@@ -153,19 +155,30 @@ export default function PendingDocumentsPage() {
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">
-            Documentos Pendientes de Revisión
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Revisa y valida los documentos subidos por los trabajadores
-          </p>
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">
+              Documentos Pendientes de Revisión
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Revisa y valida los documentos subidos por los trabajadores
+            </p>
+          </div>
+          {!loading && (
+            <span className="inline-flex h-6 items-center rounded-full bg-amber-100 px-2.5 text-xs font-semibold text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
+              {docs.length} pendiente{docs.length !== 1 ? "s" : ""}
+            </span>
+          )}
         </div>
-        {!loading && (
-          <span className="inline-flex h-6 items-center rounded-full bg-amber-100 px-2.5 text-xs font-semibold text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
-            {docs.length} pendiente{docs.length !== 1 ? "s" : ""}
-          </span>
+        {!loading && docs.length > 0 && (
+          <button
+            onClick={() => exportPendingDocumentsPDF(docs, user?.companyName ?? user?.email ?? 'Empresa')}
+            className="inline-flex h-9 items-center gap-2 rounded-lg border border-input px-4 text-sm hover:bg-accent"
+          >
+            <Download className="h-4 w-4" />
+            Exportar PDF
+          </button>
         )}
       </div>
 

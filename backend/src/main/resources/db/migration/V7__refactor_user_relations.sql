@@ -1,4 +1,4 @@
--- Las columnas manager_id y job_position_id ya existen desde V1.
+-- Las columnas manager_id y job_position_id ya existen desde V1
 -- Solo añadimos la FK de job_position que faltaba porque en V1
 -- la tabla job_positions aún no existía.
 

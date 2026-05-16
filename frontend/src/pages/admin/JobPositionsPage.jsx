@@ -20,8 +20,8 @@ function PositionFormDialog({ open, onOpenChange, editItem, onSuccess }) {
     e.preventDefault()
     setSaving(true)
     try {
-      if (editItem) { await jobPositionApi.update(editItem.id, form); toast.success('Puesto actualizado') }
-      else { await jobPositionApi.create(form); toast.success('Puesto creado') }
+      if (editItem) { await jobPositionApi.update(editItem.id, form) }
+      else { await jobPositionApi.create(form) }
       onSuccess(); onOpenChange(false)
     } catch (err) { toast.error(err.response?.data?.message || err.message || 'Error al guardar') }
     finally { setSaving(false) }
@@ -85,7 +85,7 @@ function RequirementsDialog({ open, onOpenChange, position, docTypes, epiCatalog
     try {
       await jobPositionApi.assignDocument(position.id, { documentTypeId: Number(newDocId), mandatory: newDocMandatory })
       const d = await jobPositionApi.getDocuments(position.id)
-      setDocs(d); setNewDocId(''); toast.success('Documento añadido')
+      setDocs(d); setNewDocId('')
     } catch (err) { toast.error(err.response?.data?.message || err.message || 'Error al añadir documento') }
     finally { setAddingDoc(false) }
   }
@@ -96,7 +96,7 @@ function RequirementsDialog({ open, onOpenChange, position, docTypes, epiCatalog
     try {
       await jobPositionApi.assignEpi(position.id, { epiCatalogId: Number(newEpiId), quantity: parseInt(newEpiQty, 10) || 1 })
       const e = await jobPositionApi.getEpis(position.id)
-      setEpis(e); setNewEpiId(''); setNewEpiQty(1); toast.success('EPI añadido')
+      setEpis(e); setNewEpiId(''); setNewEpiQty(1)
     } catch (err) { toast.error(err.response?.data?.message || err.message || 'Error al añadir EPI') }
     finally { setAddingEpi(false) }
   }
@@ -210,7 +210,6 @@ export default function JobPositionsPage() {
   const handleDeactivate = async (p) => {
     try {
       await jobPositionApi.deactivate(p.id)
-      toast.success('Puesto desactivado')
       load()
     } catch (err) { toast.error(err.response?.data?.message ?? 'Error al desactivar') }
   }
