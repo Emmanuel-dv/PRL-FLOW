@@ -1,10 +1,7 @@
 services:
-
   mysql:
     image: mysql:8.0
     container_name: prl-mysql
-    ports:
-      - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: prl_db
@@ -13,10 +10,11 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
       timeout: 5s
       retries: 5
+    restart: always
 
   minio:
     image: minio/minio:latest
@@ -30,6 +28,25 @@ services:
       MINIO_ROOT_PASSWORD: minioadmin123
     volumes:
       - minio_data:/data
+    restart: always
+
+  backend:
+    build: ./backend
+    container_name: prl-backend
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+    restart: always
+
+  frontend:
+    build: ./frontend
+    container_name: prl-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
     restart: always
 
 volumes:
