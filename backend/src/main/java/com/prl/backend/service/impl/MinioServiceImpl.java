@@ -21,6 +21,12 @@ public class MinioServiceImpl implements MinioService {
     private final MinioClient minioClient;
     private final FileMetadataRepository fileMetadataRepository;
 
+    @Value("${app.minio.url}")
+    private String minioUrl;
+
+    @Value("${app.minio.public-url:${app.minio.url}}")
+    private String minioPublicUrl;
+
     @Value("${app.minio.bucket}")
     private String bucketName;
 
@@ -62,13 +68,16 @@ public class MinioServiceImpl implements MinioService {
     @Override
     public String getPresignedUrl(FileMetadata fileMetadata) {
         try {
-            return minioClient.getPresignedObjectUrl(
+            String presignedUrl = minioClient.getPresignedObjectUrl(
                     GetPresignedObjectUrlArgs.builder()
                             .method(Method.GET)
                             .bucket(fileMetadata.getBucketName())
                             .object(fileMetadata.getObjectKey())
                             .expiry(1, TimeUnit.HOURS)
                             .build());
+            // Reemplaza el host interno de Docker por el host público accesible desde el navegador
+            presignedUrl = presignedUrl.replace(minioUrl, minioPublicUrl);
+            return presignedUrl;
         } catch (Exception e) {
             throw new RuntimeException(
                     "Error al generar URL presignada: " + e.getMessage(), e);

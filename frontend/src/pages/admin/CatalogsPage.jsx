@@ -9,11 +9,11 @@ const inputCls = 'flex h-9 w-full rounded-lg border border-input bg-background p
 
 // ── Document Type dialog ──────────────────────────────────────────────────────
 function DocTypeDialog({ open, onOpenChange, onSuccess }) {
-  const [form, setForm] = useState({ name: '', validityDays: '', requiresExpiryDate: false })
+  const [form, setForm] = useState({ name: '', validityDays: '', requiresExpiry: false })
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    if (open) setForm({ name: '', validityDays: '', requiresExpiryDate: false })
+    if (open) setForm({ name: '', validityDays: '', requiresExpiry: false })
   }, [open])
 
   const handleSubmit = async (e) => {
@@ -23,7 +23,7 @@ function DocTypeDialog({ open, onOpenChange, onSuccess }) {
       await catalogApi.createDocumentType({
         name: form.name,
         validityDays: form.validityDays ? Number(form.validityDays) : null,
-        requiresExpiryDate: form.requiresExpiryDate,
+        requiresExpiry: form.requiresExpiry,
       })
       onSuccess(); onOpenChange(false)
     } catch (err) { toast.error(err.response?.data?.message ?? 'Error al crear') }
@@ -44,7 +44,7 @@ function DocTypeDialog({ open, onOpenChange, onSuccess }) {
             <input type="number" min={1} className={inputCls} value={form.validityDays} onChange={(e) => setForm((f) => ({ ...f, validityDays: e.target.value }))} placeholder="365" />
           </div>
           <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={form.requiresExpiryDate} onChange={(e) => setForm((f) => ({ ...f, requiresExpiryDate: e.target.checked }))} className="rounded border-input" />
+            <input type="checkbox" checked={form.requiresExpiry} onChange={(e) => setForm((f) => ({ ...f, requiresExpiry: e.target.checked }))} className="rounded border-input" />
             Requiere fecha de caducidad
           </label>
         </form>
@@ -177,8 +177,8 @@ export default function CatalogsPage() {
                         <TableCell className="font-medium">{d.name}</TableCell>
                         <TableCell className="text-muted-foreground">{d.validityDays ? `${d.validityDays} días` : 'Sin caducidad'}</TableCell>
                         <TableCell>
-                          <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${d.requiresExpiryDate ? 'bg-amber-100 text-amber-700' : 'bg-secondary text-secondary-foreground'}`}>
-                            {d.requiresExpiryDate ? 'Sí' : 'No'}
+                          <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${d.requiresExpiry ? 'bg-amber-100 text-amber-700' : 'bg-secondary text-secondary-foreground'}`}>
+                            {d.requiresExpiry ? 'Sí' : 'No'}
                           </span>
                         </TableCell>
                       </TableRow>
