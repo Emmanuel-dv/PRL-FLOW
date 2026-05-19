@@ -6,7 +6,8 @@ import com.prl.backend.repository.FileMetadataRepository;
 import com.prl.backend.service.MinioService;
 import io.minio.*;
 import io.minio.http.Method;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,20 +16,25 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Service
-@RequiredArgsConstructor
 public class MinioServiceImpl implements MinioService {
 
-    private final MinioClient minioClient;
+    /** Cliente interno: usa el endpoint Docker para upload/delete entre contenedores */
+    @Autowired
+    private MinioClient minioClient;
+
+    /** Cliente público: usa la IP pública para firmar URLs presignadas accesibles desde el navegador */
+    @Autowired
+    @Qualifier("minioPublicClient")
+    private MinioClient minioPublicClient;
+
     private final FileMetadataRepository fileMetadataRepository;
-
-    @Value("${app.minio.url}")
-    private String minioUrl;
-
-    @Value("${app.minio.public-url:${app.minio.url}}")
-    private String minioPublicUrl;
 
     @Value("${app.minio.bucket}")
     private String bucketName;
+
+    public MinioServiceImpl(FileMetadataRepository fileMetadataRepository) {
+        this.fileMetadataRepository = fileMetadataRepository;
+    }
 
     @Override
     public FileMetadata uploadFile(MultipartFile file, User uploadedBy) {
@@ -68,16 +74,15 @@ public class MinioServiceImpl implements MinioService {
     @Override
     public String getPresignedUrl(FileMetadata fileMetadata) {
         try {
-            String presignedUrl = minioClient.getPresignedObjectUrl(
+            // Usa el cliente público para que la firma HMAC incluya el host público.
+            // Esto evita el error SignatureDoesNotMatch que ocurría al reemplazar la URL después de firmarla.
+            return minioPublicClient.getPresignedObjectUrl(
                     GetPresignedObjectUrlArgs.builder()
                             .method(Method.GET)
                             .bucket(fileMetadata.getBucketName())
                             .object(fileMetadata.getObjectKey())
                             .expiry(1, TimeUnit.HOURS)
                             .build());
-            // Reemplaza el host interno de Docker por el host público accesible desde el navegador
-            presignedUrl = presignedUrl.replace(minioUrl, minioPublicUrl);
-            return presignedUrl;
         } catch (Exception e) {
             throw new RuntimeException(
                     "Error al generar URL presignada: " + e.getMessage(), e);
