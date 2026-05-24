@@ -209,7 +209,8 @@ export default function EpiDeliveriesPage() {
 
   const load = async () => {
     try {
-      const [del, users, epis] = await Promise.all([epiApi.getAll(), userApi.getAll(), catalogApi.getAllEpiCatalog()])
+      const fetchDeliveries = user?.role === 'ADMIN' ? epiApi.getByCompany() : epiApi.getAll()
+      const [del, users, epis] = await Promise.all([fetchDeliveries, userApi.getAll(), catalogApi.getAllEpiCatalog()])
       setDeliveries(del)
       setWorkers(users.filter((u) => u.role === 'WORKER'))
       setEpiCatalog(epis)
